@@ -1,82 +1,75 @@
 #include "libft.h"
 #include "get_next_line.h"
 
-void	ft_ini_file(int fd, s_lst_files files)
+int	ft_cntlines(char **lines)
+{
+	int i;
+	int r;
+
+	i = -1;
+	r = 0;
+	while (lines[++i])
+		r++;
+	return (r);
+}
+
+void	ft_reading(t_file *file, const int fd)
 {
 	char *buff;
 	char *cont;
-	s_lst_files file;
+	char *tmp;
+	char *tmp2;
+	int ret;
 
-	ft_bzero(buff, BUFF_SIZE);
-	while ((read(fd, buff, BUFF_SIZE)) < 0)
+	buff = ft_strnew(BUFF_SIZE);
+	cont = ft_strnew(BUFF_SIZE);
+	while ((ret = read(fd, buff, BUFF_SIZE)) != 0)
 	{
-		cont = ft_strjoin(cont, buff);
+		buff[ret] = '\0';
+		tmp = strdup(buff);
+		tmp2 = strdup(cont);
+		free(cont);
+		cont = ft_strjoin(tmp2, tmp);
+		free(tmp2);
+		free(tmp);
 	}
-	if (*files != NULL)
-	{
-		while (files->next != NULL)
-			files = files->next;
-		*files->next = file;
-	}
-	file.fd = fd;
+	free(buff);
 	file->lines = ft_strsplit(cont, '\n');
-	file.index = 0;
-	file.end = 0;
-	file.next = NULL;
-	*files = file;
+	free(cont);
+	file->nb_lines = ft_cntlines(file->lines);
 }
 
-int	ft_check_fd(int fd, t_lst_files *files)
+void	ft_free2d(char **tab)
 {
 	int i;
 
-	i = 0;
-	if (files == NULL)
-		ini_fd(fd);
-	while (files->next != NULL)
-	{
-		if(files.fd == fd)
-			i++;
-		files = files->next;
-	}
-	if (i == 1)
-		return(0);
-	else
-		ft_ini_fd(fd);
-	return (0);
-}
-
-char *ft_get_line(int fd, t_lst_files)
-{
-	while (files->next != NULL)
-	{
-		if (files.fd == fd)
-		{
-			files.index++;
-			return (files.lines[files.index - 1]);
-		}
-		files = files->next;
-	}
-	if (files.fd == fd)
-	{
-		files.index++;
-		return (files.lines[files.index - 1]);
-	}
-	return (NULL);
+	i = -1;
+	while (tab[++i])
+		free(tab[i]);
+	free(tab);
 }
 
 int get_next_line(const int fd, char **line)
 {
-	char *buff;
-	static t_lst_files **files;
+	static t_file *file;
 
-	buff = ft_strnew(BUFF_SIZE);
-	ft_bzero(buff, BUFF_SIZE);
-	if ((read(fd, *buff, BUFF_SIZE)) < 0)
-		return (-1);
-	if (!(line = (char**)malloc(sizeof(char*) * 1)))
-		return (-1);
-	ft_check_fd(fd, *files);
-	*line = ft_get_line(fd, files);
+	if (!file)
+	{	
+		file = malloc(sizeof(t_file));
+		file->index = 0;
+		ft_reading(file, fd);
+	}
+	if (file->index < file->nb_lines)
+	{
+		line[0] = file->lines[file->index];
+		file->index++;
+	}
+	else
+	{
+		ft_free2d(file->lines);
+		free(file);
+		return (1);
+	}
 	return (0);
 }
+

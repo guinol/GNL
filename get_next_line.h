@@ -3,16 +3,19 @@
 # include <string.h>
 # include <stdlib.h>
 # include <unistd.h>
-# define BUFF_SIZE 4
+# include <fcntl.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# define BUFF_SIZE 1
 
-typedef struct			s_lst_files
+typedef struct			s_file
 {
-	int			fd;
+	int			ini;
 	char			**lines;
 	int			index;
-	bool			end;
-	struct s_lst_files	*next;
-}				t_lst_files
+	int			nb_lines;
+	int			end;
+}				t_file;
 
 int get_next_line(const int fd, char **line);
 

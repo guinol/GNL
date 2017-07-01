@@ -1,6 +1,6 @@
 NAME = gnl
 
-FUNCTIONS = get_next_line.c
+FUNCTIONS = get_next_line.c main.c
 
 FLAGS = -Wall -Wextra -Werror
 
